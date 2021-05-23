@@ -3,6 +3,7 @@ with Ada.Text_IO;
 
 with GNAT.Traceback.Symbolic;
 
+with RT.Cameras;
 with RT.Hitables;
 with RT.Rays;
 with RT.Vecs;
@@ -14,6 +15,7 @@ procedure Main is
     Cols : constant := 400;
 
     use RT;
+    use RT.Cameras;
     use RT.Hitables;
     use RT.Rays;
     use RT.Vecs;
@@ -41,11 +43,8 @@ begin
     Put_Line ("255");  -- Max color
 
     declare
-        Lower_Left_Corner : constant Vec3 := (-2.0, -1.0, -1.0);
-        Horizontal        : constant Vec3 := (4.0, 0.0, 0.0);
-        Vertical          : constant Vec3 := (0.0, 2.0, 0.0);
-        Origin            : constant Vec3 := (0.0, 0.0, 0.0);
         World             : Hitable_List (2);
+        Cam               : Camera;
     begin
         World.Targets(1) := new Sphere' (Center => (0.0, 0.0, -1.0), Radius => 0.5);
         World.Targets(2) := new Sphere' ((0.0, -100.5, -1.0), 100.0);
@@ -55,10 +54,7 @@ begin
                 declare
                     U : constant F32 := F32 (Col) / F32 (Cols);
                     V : constant F32 := F32 (Row) / F32 (Rows);
-                    R : constant Ray :=
-                       (Origin    => Origin,
-                        Direction =>
-                           Lower_Left_Corner + U * Horizontal + V * Vertical);
+                    R : constant Ray := Make_Ray (Cam, U, V);
                     Color   : constant Vec3    := Ray_Cast (R, World);
                     I_Red   : constant Integer := Integer (255.0 * Color.X);
                     I_Green : constant Integer := Integer (255.0 * Color.Y);
