@@ -1,3 +1,4 @@
+limited with RT.Materials;
 with RT.Rays;
 with RT.Vecs;
 
@@ -5,10 +6,13 @@ package RT.Hitables is
     use RT.Rays;
     use RT.Vecs;
 
+    type Material_Access is access RT.Materials.Material'Class;
+
     type Hit_Record is record
         T      : F32;
         P      : Vec3;
         Normal : Vec3;
+        Mat    : Material_Access;
     end record;
 
     type Hitable is interface;
@@ -25,6 +29,7 @@ package RT.Hitables is
         Targets : Hitable_Access_List (1 .. Num);
     end record;
 
+
     overriding
     function Hit
         	(H : Hitable_List; R : Ray; T_Min : F32; T_Max : F32; Rec : in out Hit_Record) return Boolean;
@@ -32,6 +37,7 @@ package RT.Hitables is
     type Sphere is new Hitable with record
         Center : Vec3;
         Radius : F32;
+        Mat : Material_Access;
     end record;
 
     overriding

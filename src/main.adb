@@ -1,11 +1,12 @@
 with Ada.Exceptions;
-with Ada.Numerics.Float_Random;
 with Ada.Text_IO;
 
 with GNAT.Traceback.Symbolic;
 
 with RT.Cameras;
 with RT.Hitables;
+with RT.Materials;
+with RT.Pseudorandom;
 with RT.Rays;
 with RT.Vecs;
 
@@ -18,36 +19,10 @@ procedure Main is
     use RT;
     use RT.Cameras;
     use RT.Hitables;
+    use RT.Materials;
+    use RT.Pseudorandom;
     use RT.Rays;
     use RT.Vecs;
-
-    Randomness : Ada.Numerics.Float_Random.Generator;
-
-    function Random_F32 return F32 is
-        use Ada.Numerics.Float_Random;
-    begin
-        return F32(Random(Randomness));
-    end Random_F32;
-
-    function Random_Vector return Vec3 is
-        use Ada.Numerics.Float_Random;
-    begin
-        return V : Vec3 do
-            V.X := F32 (Random (Randomness));
-            V.Y := F32 (Random (Randomness));
-            V.Z := F32 (Random (Randomness));
-        end return;
-    end Random_Vector;
-
-    function Random_In_Unit_Sphere return Vec3 is
-        P : Vec3;
-    begin
-        loop
-            P := 2.0 * Random_Vector - (1.0, 1.0, 1.0);
-            exit when Length2 (P) < 1.0;
-        end loop;
-        return P;
-    end Random_In_Unit_Sphere;
 
     function Sky_Color (R : Ray) return Vec3 is
         Unit_Direction : constant Vec3 := Unit_Vector (R.Direction);
@@ -56,13 +31,25 @@ procedure Main is
         return (1.0 - T) * (1.0, 1.0, 1.0) + T * (0.5, 0.7, 1.0);
     end Sky_Color;
 
-    function Ray_Cast (R : Ray; World : Hitable'Class) return Vec3 is
-        Rec    : Hit_Record;
-        Target : Vec3;
+    function Ray_Cast
+       (R : Ray; World : Hitable'Class; Depth : Natural) return Vec3
+    is
+        Rec : Hit_Record;
     begin
-        if Hit (World, R, 0.000_1, F32'Last, Rec) then
-            Target := Rec.P + Rec.Normal + Random_In_Unit_Sphere;
-            return 0.5 * Ray_Cast (Ray'(Rec.P, Target - Rec.P), World);
+        if Hit (World, R, 0.001, F32'Last, Rec) then
+            declare
+                Scattered   : Ray;
+                Attenuation : Vec3;
+            begin
+                if (Depth < 50
+                    and then Scatter
+                       (Rec.Mat.all, R, Rec, Attenuation, Scattered)) then
+                    return
+                       Attenuation * Ray_Cast (Scattered, World, Depth + 1);
+                else
+                    return (0.0, 0.0, 0.0);
+                end if;
+            end;
         else
             return Sky_Color (R);
         end if;
@@ -74,13 +61,26 @@ begin
     Put_Line ("255");  -- Max color
 
     declare
-        World : Hitable_List (2);
-        Cam   : Camera;
+        World   : Hitable_List (4);
+        Cam     : Camera;
         Samples : constant Positive := 100;
     begin
         World.Targets (1) :=
-           new Sphere'(Center => (0.0, 0.0, -1.0), Radius => 0.5);
-        World.Targets (2) := new Sphere'((0.0, -100.5, -1.0), 100.0);
+           new Sphere'
+              (Center => (0.0, 0.0, -1.0), Radius => 0.5,
+               Mat    => new Lambertian'(Albedo => (0.8, 0.3, 0.3)));
+        World.Targets (2) :=
+           new Sphere'
+              (Center => (0.0, -100.5, -1.0), Radius => 100.0,
+               Mat    => new Lambertian'(Albedo => (0.8, 0.8, 0.0)));
+        World.Targets (3) :=
+           new Sphere'
+              (Center => (1.0, 0.0, -1.0), Radius => 0.5,
+               Mat    => new Metal'(Albedo => (0.8, 0.6, 0.2), Fuzz => 0.3));
+        World.Targets (4) :=
+           new Sphere'
+              (Center => (-1.0, 0.0, -1.0), Radius => 0.5,
+               Mat    => new Metal'(Albedo => Vec3'(0.8, 0.8, 0.8), Fuzz => 1.0));
 
         for Row in reverse 1 .. Rows loop
             for Col in 1 .. Cols loop
@@ -89,28 +89,31 @@ begin
                 begin
                     for Sample in 1 .. Samples loop
                         declare
-                            U               : constant F32  := (F32 (Col) + Random_F32) / F32 (Cols);
-                            V               : constant F32  := (F32 (Row) + Random_F32) / F32 (Rows);
-                            R               : constant Ray  := Make_Ray (Cam, U, V);
-                            Color           : constant Vec3 := Ray_Cast (R, World);
+                            U : constant F32 :=
+                               (F32 (Col) + Random_F32) / F32 (Cols);
+                            V : constant F32 :=
+                               (F32 (Row) + Random_F32) / F32 (Rows);
+                            R     : constant Ray  := Make_Ray (Cam, U, V);
+                            Color : constant Vec3 := Ray_Cast (R, World, 0);
                         begin
                             Result := Result + Color;
                         end;
                     end loop;
-                    Result := Result / F32(Samples);
-                declare
+                    Result := Result / F32 (Samples);
+                    declare
                         Gamma_Corrected : constant Vec3 :=
-                                            (Elem_Funcs.Sqrt (Result.X), Elem_Funcs.Sqrt (Result.Y),
-                                             Elem_Funcs.Sqrt (Result.Z));
-                        I_Red           : constant Integer :=
-                                            Integer (255.0 * Gamma_Corrected.X);
-                        I_Green         : constant Integer :=
-                                            Integer (255.0 * Gamma_Corrected.Y);
-                        I_Blue          : constant Integer :=
-                                            Integer (255.0 * Gamma_Corrected.Z);
+                           (Elem_Funcs.Sqrt (Result.X),
+                            Elem_Funcs.Sqrt (Result.Y),
+                            Elem_Funcs.Sqrt (Result.Z));
+                        I_Red : constant Integer :=
+                           Integer (255.0 * Gamma_Corrected.X);
+                        I_Green : constant Integer :=
+                           Integer (255.0 * Gamma_Corrected.Y);
+                        I_Blue : constant Integer :=
+                           Integer (255.0 * Gamma_Corrected.Z);
                     begin
                         Put (I_Red'Image & " " & I_Green'Image & " " &
-                                 I_Blue'Image & " ");
+                            I_Blue'Image & " ");
                     end;
                 end;
             end loop;

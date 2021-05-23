@@ -33,6 +33,7 @@ package body RT.Hitables is
                 Hit.T      := T;
                 Hit.P      := Point_At (R, T);
                 Hit.Normal := (Hit.P - S.Center) / S.Radius;
+                Hit.Mat    := S.Mat;
             end return;
         end Make_Hit;
     begin

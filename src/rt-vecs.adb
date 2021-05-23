@@ -29,4 +29,6 @@ package body RT.Vecs is
     end Cross;
 
     function Unit_Vector (V : Vec3) return Vec3 is (V / Length(V));
+
+    function Reflect (V, N: Vec3) return Vec3 is (V - 2.0 * Dot (V, N) * N);
 end RT.Vecs;

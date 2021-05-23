@@ -24,4 +24,6 @@ is
     function Cross (A, B : Vec3) return Vec3;
 
     function Unit_Vector(V : Vec3) return Vec3;
+
+    function Reflect (V, N: Vec3) return Vec3;
 end RT.Vecs;
