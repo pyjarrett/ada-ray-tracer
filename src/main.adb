@@ -1,5 +1,9 @@
+with Ada.Exceptions;
 with Ada.Text_IO;
 
+with GNAT.Traceback.Symbolic;
+
+with RT.Hitables;
 with RT.Rays;
 with RT.Vecs;
 
@@ -10,9 +14,9 @@ procedure Main is
     Cols : constant := 400;
 
     use RT;
+    use RT.Hitables;
     use RT.Rays;
     use RT.Vecs;
-
 
     function Sky_Color (R : Ray) return Vec3 is
         Unit_Direction : constant Vec3 := Unit_Vector (R.Direction);
@@ -21,21 +25,14 @@ procedure Main is
         return (1.0 - T) * (1.0, 1.0, 1.0) + T * (0.5, 0.7, 1.0);
     end Sky_Color;
 
-    function Hit_Sphere (Center : Vec3; Radius : F32; R : Ray) return Boolean
-    is
-        OC           : constant Vec3 := R.Origin - Center;
-        A            : constant F32  := Dot (R.Direction, R.Direction);
-        B            : constant F32  := 2.0 * Dot (OC, R.Direction);
-        C            : constant F32  := Dot (OC, OC) - Radius * Radius;
-        Discriminant : constant F32  := B * B - 4.0 * A * C;
+    function Ray_Cast (R : Ray; World : Hitable'Class) return Vec3 is
+        Rec : Hit_Record;
     begin
-        return Discriminant > 0.0;
-    end Hit_Sphere;
-
-    function Ray_Cast (R : Ray) return Vec3 is
-        Collision : constant Boolean := Hit_Sphere ((0.0, 0.0, -1.0), 0.5, R);
-    begin
-        return (if Collision then (1.0, 0.0, 0.0) else Sky_Color(R));
+        if Hit(World, R, 0.0, F32'Last, Rec) then
+            return 0.5 * (Rec.Normal + (1.0, 1.0, 1.0));
+        else
+            return Sky_Color(R);
+        end if;
     end Ray_Cast;
 
 begin
@@ -48,7 +45,11 @@ begin
         Horizontal        : constant Vec3 := (4.0, 0.0, 0.0);
         Vertical          : constant Vec3 := (0.0, 2.0, 0.0);
         Origin            : constant Vec3 := (0.0, 0.0, 0.0);
+        World             : Hitable_List (2);
     begin
+        World.Targets(1) := new Sphere' (Center => (0.0, 0.0, -1.0), Radius => 0.5);
+        World.Targets(2) := new Sphere' ((0.0, -100.5, -1.0), 100.0);
+
         for Row in reverse 1 .. Rows loop
             for Col in 1 .. Cols loop
                 declare
@@ -58,7 +59,7 @@ begin
                        (Origin    => Origin,
                         Direction =>
                            Lower_Left_Corner + U * Horizontal + V * Vertical);
-                    Color   : constant Vec3    := Ray_Cast (R);
+                    Color   : constant Vec3    := Ray_Cast (R, World);
                     I_Red   : constant Integer := Integer (255.0 * Color.X);
                     I_Green : constant Integer := Integer (255.0 * Color.Y);
                     I_Blue  : constant Integer := Integer (255.0 * Color.Z);
@@ -70,4 +71,8 @@ begin
             New_Line;
         end loop;
     end;
+exception
+    when Err : others =>
+        Ada.Text_IO.Put_Line (Ada.Exceptions.Exception_Information (Err));
+        Ada.Text_IO.Put_Line ("Exception traceback: " & GNAT.Traceback.Symbolic.Symbolic_Traceback (Err));
 end Main;

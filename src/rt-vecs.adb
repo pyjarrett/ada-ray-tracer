@@ -1,9 +1,4 @@
-with Ada.Numerics.Generic_Elementary_Functions;
-
 package body RT.Vecs is
-
-    package Elem_Funcs is new Ada.Numerics.Generic_Elementary_Functions (F32);
-
     function "-"(V : Vec3) return Vec3 is (-V.X, -V.Y, -V.Z);
 
     function "+"(A, B : Vec3) return Vec3 is (A.X + B.X, A.Y + B.Y, A.Z + B.Z);
