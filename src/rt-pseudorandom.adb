@@ -27,4 +27,16 @@ package body RT.Pseudorandom is
         return P;
     end Random_In_Unit_Sphere;
 
+    function Random_Unit_Vector return Vec3 is (Unit_Vector(Random_In_Unit_Sphere));
+
+    function Random_In_Hemisphere(N : Vec3) return Vec3 is
+        V : constant Vec3 := Random_In_Unit_Sphere;
+    begin
+        if Dot(V, N) > 0.0 then
+            return V;
+        else
+            return -V;
+        end if;
+    end Random_In_Hemisphere;
+
 end RT.Pseudorandom;

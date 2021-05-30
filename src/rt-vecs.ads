@@ -26,4 +26,9 @@ is
     function Unit_Vector(V : Vec3) return Vec3;
 
     function Reflect (V, N: Vec3) return Vec3;
+
+    function Refract (UV, N : Vec3; Ni_Over_Nt : F32) return Vec3;
+
+    function Near_Zero (V : Vec3) return Boolean;
+    function Near_Unit (V : Vec3) return Boolean;
 end RT.Vecs;

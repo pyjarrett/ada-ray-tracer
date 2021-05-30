@@ -31,4 +31,26 @@ package body RT.Vecs is
     function Unit_Vector (V : Vec3) return Vec3 is (V / Length(V));
 
     function Reflect (V, N: Vec3) return Vec3 is (V - 2.0 * Dot (V, N) * N);
+
+    function Refract (UV, N : Vec3; Ni_Over_Nt : F32) return Vec3 is
+        Cos_Theta : constant F32 := F32'Min(Dot (-UV, N), 1.0);
+        R_Out_Perp : constant Vec3 := Ni_Over_Nt * (UV + Cos_Theta * N);
+        R_Out_Parallel : constant Vec3 := -Elem_Funcs.Sqrt(abs (1.0 - Length2(R_Out_Perp))) * N;
+        Result : constant Vec3 := R_Out_Perp + R_Out_Parallel;
+    begin
+        return Result;
+    end Refract;
+
+    function Near_Zero (V : Vec3) return Boolean is
+        Epsilon : constant := 0.000_000_001;
+    begin
+        return abs V.X < Epsilon and then abs V.Y < Epsilon and then abs V.Z < Epsilon;
+    end Near_Zero;
+
+    function Near_Unit (V : Vec3) return Boolean is
+        Epsilon : constant := 1.000_000_001;
+    begin
+        return abs V.X < Epsilon and then abs V.Y < Epsilon and then abs V.Z < Epsilon;
+    end Near_Unit;
+
 end RT.Vecs;

@@ -26,4 +26,13 @@ package RT.Materials is
     overriding
     function Scatter (Mat : Metal; R : Ray; Rec : RT.Hitables.Hit_Record; Attenuation : in out Vec3; Scattered : in out Ray) return Boolean;
 
+    type Dielectric is new Material with record
+        Ref_Index : F32 := 1.0;
+    end record;
+
+    overriding
+    function Scatter (Mat : Dielectric; R : Ray; Rec : RT.Hitables.Hit_Record; Attenuation : in out Vec3; Scattered : in out Ray) return Boolean;
+
+    function Schlick (Cosine, Ref_Index : F32) return F32;
+
 end RT.Materials;

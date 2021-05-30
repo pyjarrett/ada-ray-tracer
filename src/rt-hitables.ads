@@ -9,10 +9,11 @@ package RT.Hitables is
     type Material_Access is access RT.Materials.Material'Class;
 
     type Hit_Record is record
-        T      : F32;
-        P      : Vec3;
-        Normal : Vec3;
-        Mat    : Material_Access;
+        T          : F32;
+        P          : Vec3;
+        Normal     : Vec3;
+        Front_Face : Boolean;
+        Mat        : Material_Access;
     end record;
 
     type Hitable is interface;

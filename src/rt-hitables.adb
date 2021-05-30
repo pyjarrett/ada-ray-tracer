@@ -22,40 +22,33 @@ package body RT.Hitables is
        (S : Sphere; R : Ray; T_Min : F32; T_Max : F32; Rec : in out Hit_Record)
         return Boolean
     is
-        OC           : constant Vec3 := R.Origin - S.Center;
-        A            : constant F32  := Dot (R.Direction, R.Direction);
-        B            : constant F32  := Dot (OC, R.Direction);
-        C            : constant F32  := Dot (OC, OC) - S.Radius * S.Radius;
-        Discriminant : constant F32  := B * B - A * C;
-        function Make_Hit (T : F32) return Hit_Record is
-        begin
-            return Hit : Hit_Record do
-                Hit.T      := T;
-                Hit.P      := Point_At (R, T);
-                Hit.Normal := (Hit.P - S.Center) / S.Radius;
-                Hit.Mat    := S.Mat;
-            end return;
-        end Make_Hit;
+        OC                : constant Vec3 := R.Origin - S.Center;
+        A                 : constant F32  := Length2(R.Direction);
+        Half_B            : constant F32  := Dot (OC, R.Direction);
+        C                 : constant F32  := Length2(OC) - S.Radius * S.Radius;
+        Discriminant      : constant F32  := Half_B * Half_B - A * C;
     begin
-        if Discriminant > 0.0 then
-            declare
-                Sqrt_Disc : constant F32 := RT.Elem_Funcs.Sqrt (Discriminant);
-                Root1     : constant F32 := (-B - Sqrt_Disc) / A;
-                Root2     : constant F32 := (-B + Sqrt_Disc) / A;
-            begin
-
-                if Root1 < T_Max and Root1 > T_Min then
-                    Rec := Make_Hit (Root1);
-                    return True;
-                end if;
-
-                if Root2 < T_Max and Root2 > T_Min then
-                    Rec := Make_Hit (Root1);
-                    return True;
-                end if;
-            end;
+        if Discriminant < 0.0 then
+            return False;
         end if;
-        return False;
+
+        declare
+            Sqrt_Disc : constant F32 := RT.Elem_Funcs.Sqrt (Discriminant);
+            Root      : F32 := (-Half_B - Sqrt_Disc) / A;
+        begin
+            if Root < T_Min or else T_Max < Root then
+                Root := (-Half_B + Sqrt_Disc) / A;
+                if Root < T_Min or else T_Max < Root then
+                    return False;
+                end if;
+            end if;
+
+            Rec.T := Root;
+            Rec.P := Point_At(R, Rec.T);
+            Rec.Normal := (Rec.P - S.Center) / S.Radius;
+            Rec.Mat := S.Mat;
+            return True;
+        end;
     end Hit;
 
 end RT.Hitables;

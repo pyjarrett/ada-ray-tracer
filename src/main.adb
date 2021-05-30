@@ -13,8 +13,10 @@ with RT.Vecs;
 procedure Main is
     use Ada.Text_IO;
 
-    Rows : constant := 200;
-    Cols : constant := 400;
+    Rows    : constant := 100;
+    Cols    : constant := 200;
+    Bounces : constant := 50;
+    Samples : constant := 100;
 
     use RT;
     use RT.Cameras;
@@ -32,27 +34,30 @@ procedure Main is
     end Sky_Color;
 
     function Ray_Cast
-       (R : Ray; World : Hitable'Class; Depth : Natural) return Vec3
+       (R : Ray; World : Hitable'Class; Depth : Integer) return Vec3
     is
         Rec : Hit_Record;
     begin
+        if Depth <= 0 then
+            return (0.0, 0.0, 0.0);
+        end if;
+
         if Hit (World, R, 0.001, F32'Last, Rec) then
             declare
                 Scattered   : Ray;
                 Attenuation : Vec3;
             begin
-                if (Depth < 50
-                    and then Scatter
-                       (Rec.Mat.all, R, Rec, Attenuation, Scattered)) then
+                if Scatter (Rec.Mat.all, R, Rec, Attenuation, Scattered) then
                     return
-                       Attenuation * Ray_Cast (Scattered, World, Depth + 1);
+                       Attenuation * Ray_Cast (Scattered, World, Depth - 1);
                 else
                     return (0.0, 0.0, 0.0);
                 end if;
             end;
-        else
-            return Sky_Color (R);
         end if;
+
+        -- Nothing was hit.
+        return Sky_Color (R);
     end Ray_Cast;
 
 begin
@@ -61,40 +66,46 @@ begin
     Put_Line ("255");  -- Max color
 
     declare
-        World   : Hitable_List (4);
-        Cam     : Camera;
-        Samples : constant Positive := 100;
+        World : Hitable_List (5);
+        Cam   : Camera;
     begin
+        --  World.Targets(1) := new Sphere' (Center => (0.0, 0.0, -1.0), Radius => 0.5,
+        --                                   Mat => new Dielectric'(Ref_Index => 1.5));
         World.Targets (1) :=
            new Sphere'
               (Center => (0.0, 0.0, -1.0), Radius => 0.5,
-               Mat    => new Lambertian'(Albedo => (0.8, 0.3, 0.3)));
-        World.Targets (2) :=
-           new Sphere'
-              (Center => (0.0, -100.5, -1.0), Radius => 100.0,
-               Mat    => new Lambertian'(Albedo => (0.8, 0.8, 0.0)));
+               Mat    => new Lambertian'(Albedo => (0.1, 0.2, 0.5)));
+          World.Targets (2) :=
+            new Sphere'
+                (Center => (0.0, -100.5, -1.0), Radius => 100.0,
+                 Mat    => new Lambertian'(Albedo => (0.8, 0.8, 0.0)));
         World.Targets (3) :=
            new Sphere'
               (Center => (1.0, 0.0, -1.0), Radius => 0.5,
-               Mat    => new Metal'(Albedo => (0.8, 0.6, 0.2), Fuzz => 0.3));
+               Mat    => new Metal'(Albedo => (0.8, 0.6, 0.2), Fuzz => 0.0));
         World.Targets (4) :=
            new Sphere'
               (Center => (-1.0, 0.0, -1.0), Radius => 0.5,
-               Mat    => new Metal'(Albedo => Vec3'(0.8, 0.8, 0.8), Fuzz => 1.0));
+               Mat    => new Dielectric'(Ref_Index => 1.5));
+        World.Targets (5) :=
+            new Sphere'
+                (Center => (-1.0, 0.0, -1.0), Radius => -0.45,
+                 Mat => new Dielectric'(Ref_Index => 1.5));
 
         for Row in reverse 1 .. Rows loop
-            for Col in 1 .. Cols loop
+            for C in 1 .. Cols loop
                 declare
                     Result : Vec3 := (0.0, 0.0, 0.0);
                 begin
                     for Sample in 1 .. Samples loop
                         declare
                             U : constant F32 :=
-                               (F32 (Col) + Random_F32) / F32 (Cols);
+                               (F32 (C) + Random_F32) / F32 (Cols);
                             V : constant F32 :=
                                (F32 (Row) + Random_F32) / F32 (Rows);
                             R     : constant Ray  := Make_Ray (Cam, U, V);
-                            Color : constant Vec3 := Ray_Cast (R, World, 0);
+                            Color : constant Vec3 :=
+                               Ray_Cast (R, World, Bounces);
                         begin
                             Result := Result + Color;
                         end;
