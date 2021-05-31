@@ -3,11 +3,29 @@ with Interfaces;
 with RT.Image_Planes;
 
 package RT.BMP is
+    -- Provides a simple uncompressed BMP implementation that will work with
+    -- many image viewers.
+    --
+    -- PPM generation is neat, but it doesn't play well with Windows because
+    -- output encoding has an effect on whether it's loadable by some viewers,
+    -- since Powershell (and much of Windows as a whole) uses UTF-16 by default.
+    --
+    -- This avoids needing special powershell pipes and frees us stdout for
+    -- additional diagnostics, in addition to having stderr available.
+    --
+    -- Before: "utf7" seems bizarre, but it ensure UTF-8 with no BOM
+    --
+    --     .\obj\main.exe | Out-File -FilePath output.ppm -Encoding utf7
+    --
     use Interfaces;
 
     Byte : constant := 8;
+
+    BMP_Magic : constant := 16#4D42#;
+    -- This is "BM"
+
     type Bitmap_File_Header is record
-        Identifier      : Integer_16 := 16#4D42#;
+        Identifier      : Integer_16 := BMP_Magic;
         File_Size_Bytes : Integer_32;
         Reserved        : Integer_16 := 0;
         Reserved2       : Integer_16 := 0;
@@ -61,5 +79,6 @@ package RT.BMP is
     end record;
 
     procedure Write (File_Name : in String; IP : in RT.Image_Planes.Image_Plane);
+    -- Writes an extremely simple, uncompressed BMP as the given file.
 
 end RT.BMP;

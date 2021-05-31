@@ -7,19 +7,19 @@ package RT.Image_Planes is
         Blue : Interfaces.Unsigned_8;
     end record;
 
-    Black : constant Pixel := (0, 0, 0);
+    function Bits_Per_Pixel return Interfaces.Integer_16 is (24);
 
-    type Pixel_Row is array (Positive range <>) of Pixel;
-    --  type Pixel_Grid(Width : is array (Positive range <>) of Pixel_Row;
-    type Pixel_Array is
+    type Pixel_Grid is
        array (Positive range <>, Positive range <>) of Pixel;
 
     type Image_Plane (Height : Positive; Width : Positive) is tagged record
-        Raster : Pixel_Array (1 .. Height, 1 .. Width);
+        -- Wraps the pixel array so its bounds remain unknown, and yet because
+        -- of the magic of discriminants, things still "just work", while also
+        -- getting nicely named values for Width and Height.
+        Raster : Pixel_Grid (1 .. Height, 1 .. Width);
     end record;
 
-    function Bits_Per_Pixel (IP : Image_Plane) return Interfaces.Integer_16 is (24);
-
     function Make_Image_Plane (Width : Positive; Height : Positive) return Image_Plane;
+    -- Convenience function to hide plane creation and avoid raster initialization.
 
 end RT.Image_Planes;
