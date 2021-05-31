@@ -1,6 +1,7 @@
 with Ada.Exceptions;
 with Ada.Text_IO;
 
+with GNATCOLL.Terminal;
 with GNAT.Traceback.Symbolic;
 with Interfaces;
 
@@ -29,6 +30,15 @@ procedure Main is
     use RT.Vecs;
 
     Image : RT.Image_Planes.Image_Plane := RT.Image_Planes.Make_Image_Plane(Width => Cols, Height => Rows);
+    Term_Info : GNATCOLL.Terminal.Terminal_Info;
+
+    procedure Report_Progress (Done, Total : Integer) is
+        Progress_Percent : constant Integer := Integer(Float'Rounding(Float(Done) / Float(Total) * 100.0));
+    begin
+        GNATCOLL.Terminal.Beginning_Of_Line(Term_Info);
+        GNATCOLL.Terminal.Clear_To_End_Of_Line(Term_Info);
+        Ada.Text_IO.Put (Progress_Percent'Image & "%");
+    end Report_Progress;
 
     function Sky_Color (R : Ray) return Vec3 is
         Unit_Direction : constant Vec3 := Unit_Vector (R.Direction);
@@ -64,6 +74,8 @@ procedure Main is
         return Sky_Color (R);
     end Ray_Cast;
 begin
+    GNATCOLL.Terminal.Init_For_Stdout (Term_Info);
+
     declare
         World : Hitable_List (5);
         Cam   : Camera;
@@ -92,6 +104,7 @@ begin
                  Mat => new Dielectric'(Ref_Index => 1.5));
 
         for Row in reverse 1 .. Rows loop
+            Report_Progress(Rows - Row, Rows);
             for C in 1 .. Cols loop
                 declare
                     Result : Vec3 := (0.0, 0.0, 0.0);
