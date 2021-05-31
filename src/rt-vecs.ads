@@ -2,7 +2,7 @@ package RT.Vecs with
     Pure
 is
     type Vec3 is record
-        X, Y, Z : F32;
+        X, Y, Z : F32 := 0.0;
     end record;
 
     function "-" (V : Vec3) return Vec3;
