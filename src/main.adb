@@ -2,21 +2,23 @@ with Ada.Exceptions;
 with Ada.Text_IO;
 
 with GNAT.Traceback.Symbolic;
+with Interfaces;
 
+with RT.BMP;
 with RT.Cameras;
 with RT.Hitables;
+with RT.Image_Planes;
 with RT.Materials;
 with RT.Pseudorandom;
 with RT.Rays;
 with RT.Vecs;
 
-procedure Main is
-    use Ada.Text_IO;
 
-    Rows    : constant := 100;
-    Cols    : constant := 200;
+procedure Main is
+    Rows    : constant := 500;
+    Cols    : constant := 1000;
     Bounces : constant := 50;
-    Samples : constant := 100;
+    Samples : constant := 30;
 
     use RT;
     use RT.Cameras;
@@ -25,6 +27,8 @@ procedure Main is
     use RT.Pseudorandom;
     use RT.Rays;
     use RT.Vecs;
+
+    Image : RT.Image_Planes.Image_Plane := RT.Image_Planes.Make_Image_Plane(Width => Cols, Height => Rows);
 
     function Sky_Color (R : Ray) return Vec3 is
         Unit_Direction : constant Vec3 := Unit_Vector (R.Direction);
@@ -59,12 +63,7 @@ procedure Main is
         -- Nothing was hit.
         return Sky_Color (R);
     end Ray_Cast;
-
 begin
-    Put_Line ("P3");
-    Put_Line (Cols'Image & " " & Rows'Image);
-    Put_Line ("255");  -- Max color
-
     declare
         World : Hitable_List (5);
         Cam   : Camera;
@@ -123,14 +122,16 @@ begin
                         I_Blue : constant Integer :=
                            Integer (255.0 * Gamma_Corrected.Z);
                     begin
-                        Put (I_Red'Image & " " & I_Green'Image & " " &
-                            I_Blue'Image & " ");
+                        Image.Raster(Row, C).Red := Interfaces.Unsigned_8(I_Red);
+                        Image.Raster(Row, C).Green := Interfaces.Unsigned_8(I_Green);
+                        Image.Raster(Row, C).Blue := Interfaces.Unsigned_8(I_Blue);
                     end;
                 end;
             end loop;
-            New_Line;
         end loop;
     end;
+
+    RT.BMP.Write ("output.bmp", Image);
 exception
     when Err : others =>
         Ada.Text_IO.Put_Line (Ada.Exceptions.Exception_Information (Err));
