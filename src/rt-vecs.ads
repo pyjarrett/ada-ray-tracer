@@ -34,6 +34,12 @@ is
     function "+"(A : Vec3; B : Point3) return Point3 is (Point3(A) + B);
     -- Translate a point by a vector.
 
+    function "-"(A : Point3; B : Vec3) return Point3 is (A - Point3(B));
+    -- Translate a point by a vector.
+
+    function "-"(A : Vec3; B : Point3) return Point3 is (Point3(A) - B);
+    -- Translate a point by a vector.
+
     function "-"(To : Point3; From : Point3) return Vec3 is (Vec3(To) - Vec3(From));
     -- The vector giving a direction between two points.
 

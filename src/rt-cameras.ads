@@ -8,13 +8,19 @@ is
     use RT.Rays;
     use RT.Vecs;
 
-    type Camera is record
-        Lower_Left_Corner : Vec3 := (-2.0, -1.0, -1.0);
-        Horizontal        : Vec3 := (4.0, 0.0, 0.0);
-        Vertical          : Vec3 := (0.0, 2.0, 0.0);
-        Origin            : Point3 := (0.0, 0.0, 0.0);
-    end record;
+    type Camera is private;
+
+    function Make_Camera return Camera;
 
     function Make_Ray (C : Camera; U, V : F32) return Ray;
+
+private
+
+    type Camera is record
+        Origin            : Point3;
+        Lower_Left_Corner : Point3;
+        Horizontal        : Vec3;
+        Vertical          : Vec3;
+    end record;
 
 end RT.Cameras;

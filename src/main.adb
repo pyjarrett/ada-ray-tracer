@@ -78,7 +78,7 @@ begin
 
     declare
         World : Hitable_List;
-        Cam   : Camera;
+        Cam   : constant Camera := Make_Camera;
     begin
         World.Add(Sphere'(Center => (0.0, 0.0, -1.0), Radius => 0.5,
                           Mat    => new Lambertian'(Albedo => (0.1, 0.2, 0.5))));
