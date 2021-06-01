@@ -50,7 +50,7 @@ package body RT.Hitables is
     end Clear;
 
     procedure Add (H : in out Hitable_List; Obj : in Hitable'Class) is
-        Ptr : Pointers.Ref;
+        Ptr : Hitable_Ptrs.Ref;
     begin
         Ptr.Set (Obj);
         H.Targets.Append (Ptr);

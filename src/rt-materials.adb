@@ -4,6 +4,13 @@ with RT.Pseudorandom;
 with RT.Debug;
 
 package body RT.Materials is
+    function Make_Material(Mat : Material'Class) return Material_Ptrs.Ref is
+        Ptr : Material_Ptrs.Ref;
+    begin
+        Ptr.Set (Mat);
+        return Ptr;
+    end Make_Material;
+
     overriding function Scatter
        (Mat         :        Lambertian; R : Ray; Rec : RT.Hitables.Hit_Record;
         Attenuation : in out Color3; Scattered : in out Ray) return Boolean
