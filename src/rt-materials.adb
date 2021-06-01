@@ -36,19 +36,12 @@ package body RT.Materials is
         Attenuation : in out Color3; Scattered : in out Ray) return Boolean
     is
         Refracted      : Vec3;
-        Ni_Over_Nt     : F32;
         Unit_Direction : constant Vec3 := Unit_Vector (R.Direction);
+        Refraction_Ratio : constant F32 := (if Rec.Front_Face then (1.0 / Mat.Ref_Index) else Mat.Ref_Index);
         use RT.Debug;
     begin
         Attenuation := (1.0, 1.0, 1.0);
-        if Dot (Unit_Direction, Rec.Normal) > 0.0 then
-            Ni_Over_Nt     := Mat.Ref_Index;
-            Refracted := Refract (Unit_Direction, -Rec.Normal, Ni_Over_Nt);
-        else
-            Ni_Over_Nt     := 1.0 / Mat.Ref_Index;
-            Refracted := Refract (Unit_Direction, Rec.Normal, Ni_Over_Nt);
-        end if;
-
+        Refracted := Refract (Unit_Direction, Rec.Normal, Refraction_Ratio);
         Scattered := (Rec.P, Unit_Vector(Refracted));
 
         if Debug.Enabled then

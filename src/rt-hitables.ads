@@ -16,6 +16,8 @@ package RT.Hitables is
         Mat        : Material_Access;
     end record;
 
+    procedure Set_Face_Normal (Rec : in out Hit_Record; R : Ray; Outward_Normal : Vec3);
+
     type Hitable is interface;
 
     function Hit

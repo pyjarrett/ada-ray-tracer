@@ -16,8 +16,8 @@ with RT.Vecs;
 
 
 procedure Main is
-    Rows    : constant := 500;
-    Cols    : constant := 1000;
+    Rows    : constant := 200;
+    Cols    : constant := 400;
     Bounces : constant := 50;
     Samples : constant := 30;
 
