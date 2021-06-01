@@ -2,9 +2,9 @@ with Interfaces;
 
 package RT.Image_Planes is
     type Pixel is record
-        Red : Interfaces.Unsigned_8;
-        Green : Interfaces.Unsigned_8;
         Blue : Interfaces.Unsigned_8;
+        Green : Interfaces.Unsigned_8;
+        Red : Interfaces.Unsigned_8;
     end record;
 
     function Bits_Per_Pixel return Interfaces.Integer_16 is (24);
