@@ -77,31 +77,19 @@ begin
     GNATCOLL.Terminal.Init_For_Stdout (Term_Info);
 
     declare
-        World : Hitable_List (5);
+        World : Hitable_List;
         Cam   : Camera;
     begin
-        --  World.Targets(1) := new Sphere' (Center => (0.0, 0.0, -1.0), Radius => 0.5,
-        --                                   Mat => new Dielectric'(Ref_Index => 1.5));
-        World.Targets (1) :=
-           new Sphere'
-              (Center => (0.0, 0.0, -1.0), Radius => 0.5,
-               Mat    => new Lambertian'(Albedo => (0.1, 0.2, 0.5)));
-          World.Targets (2) :=
-            new Sphere'
-                (Center => (0.0, -100.5, -1.0), Radius => 100.0,
-                 Mat    => new Lambertian'(Albedo => (0.8, 0.8, 0.0)));
-        World.Targets (3) :=
-           new Sphere'
-              (Center => (1.0, 0.0, -1.0), Radius => 0.5,
-               Mat    => new Metal'(Albedo => (0.8, 0.6, 0.2), Fuzz => 0.0));
-        World.Targets (4) :=
-           new Sphere'
-              (Center => (-1.0, 0.0, -1.0), Radius => 0.5,
-               Mat    => new Dielectric'(Ref_Index => 1.5));
-        World.Targets (5) :=
-            new Sphere'
-                (Center => (-1.0, 0.0, -1.0), Radius => -0.45,
-                 Mat => new Dielectric'(Ref_Index => 1.5));
+        World.Add(Sphere'(Center => (0.0, 0.0, -1.0), Radius => 0.5,
+                          Mat    => new Lambertian'(Albedo => (0.1, 0.2, 0.5))));
+        World.Add(Sphere'(Center => (0.0, -100.5, -1.0), Radius => 100.0,
+                          Mat    => new Lambertian'(Albedo => (0.8, 0.8, 0.0))));
+        World.Add(Sphere'(Center => (1.0, 0.0, -1.0), Radius => 0.5,
+                          Mat    => new Metal'(Albedo => (0.8, 0.6, 0.2), Fuzz => 0.0)));
+        World.Add(Sphere'(Center => (-1.0, 0.0, -1.0), Radius => 0.5,
+                          Mat    => new Dielectric'(Ref_Index => 1.5)));
+        World.Add(Sphere'(Center => (-1.0, 0.0, -1.0), Radius => -0.45,
+                          Mat => new Dielectric'(Ref_Index => 1.5)));
 
         for Row in reverse 1 .. Rows loop
             Report_Progress(Rows - Row, Rows);

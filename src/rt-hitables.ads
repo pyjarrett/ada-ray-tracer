@@ -2,6 +2,9 @@ limited with RT.Materials;
 with RT.Rays;
 with RT.Vecs;
 
+with Ada.Containers.Vectors;
+with GNATCOLL.Refcount;
+
 package RT.Hitables is
     use RT.Rays;
     use RT.Vecs;
@@ -24,19 +27,6 @@ package RT.Hitables is
         (Table :        Hitable; R : Ray; T_Min : F32; T_Max : F32;
          Hit   : in out Hit_Record) return Boolean is abstract;
 
-
-    type Hitable_Access is access Hitable'Class;
-    type Hitable_Access_List is array (Positive range <>) of Hitable_Access;
-
-    type Hitable_List (Num : Positive) is new Hitable with record
-        Targets : Hitable_Access_List (1 .. Num);
-    end record;
-
-
-    overriding
-    function Hit
-        	(H : Hitable_List; R : Ray; T_Min : F32; T_Max : F32; Rec : in out Hit_Record) return Boolean;
-
     type Sphere is new Hitable with record
         Center : Point3;
         Radius : F32;
@@ -46,5 +36,25 @@ package RT.Hitables is
     overriding
     function Hit
         	(S : Sphere; R : Ray; T_Min : F32; T_Max : F32; Rec : in out Hit_Record) return Boolean;
+
+
+    package Pointers is new GNATCOLL.Refcount.Shared_Pointers (Element_Type => Hitable'Class);
+    package Hitable_Lists is new Ada.Containers.Vectors (Index_Type => Positive,
+                                                         Element_Type => Pointers.Ref,
+                                                         "=" => Pointers."=");
+    type Hitable_List is new Hitable with private;
+
+    procedure Clear (H : in out Hitable_List);
+    procedure Add (H : in out Hitable_List; Obj : in Hitable'Class);
+
+    overriding
+    function Hit
+        	(H : Hitable_List; R : Ray; T_Min : F32; T_Max : F32; Rec : in out Hit_Record) return Boolean;
+
+private
+
+    type Hitable_list is new Hitable with record
+        Targets : Hitable_Lists.Vector;
+    end record;
 
 end RT.Hitables;

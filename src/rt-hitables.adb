@@ -10,24 +10,6 @@ package body RT.Hitables is
     end Set_Face_Normal;
 
     overriding function Hit
-       (H   :        Hitable_List; R : Ray; T_Min : F32; T_Max : F32;
-        Rec : in out Hit_Record) return Boolean
-    is
-        Next_Hit       : Hit_Record;
-        Closest_So_Far : F32 := T_Max;
-    begin
-        return Hit_Anything : Boolean := False do
-            for Target of H.Targets loop
-                if Hit (Target.all, R, T_Min, Closest_So_Far, Next_Hit) then
-                    Hit_Anything   := True;
-                    Closest_So_Far := Next_Hit.T;
-                    Rec            := Next_Hit;
-                end if;
-            end loop;
-        end return;
-    end Hit;
-
-    overriding function Hit
        (S : Sphere; R : Ray; T_Min : F32; T_Max : F32; Rec : in out Hit_Record)
         return Boolean
     is
@@ -60,6 +42,36 @@ package body RT.Hitables is
             Set_Face_Normal (Rec, R, Outward_Normal);
             return True;
         end;
+    end Hit;
+
+    procedure Clear (H : in out Hitable_List) is
+    begin
+        H.Targets.Clear;
+    end Clear;
+
+    procedure Add (H : in out Hitable_List; Obj : in Hitable'Class) is
+        Ptr : Pointers.Ref;
+    begin
+        Ptr.Set (Obj);
+        H.Targets.Append (Ptr);
+    end Add;
+
+    overriding function Hit
+       (H   :        Hitable_List; R : Ray; T_Min : F32; T_Max : F32;
+        Rec : in out Hit_Record) return Boolean
+    is
+        Next_Hit       : Hit_Record;
+        Closest_So_Far : F32 := T_Max;
+    begin
+        return Hit_Anything : Boolean := False do
+            for Target of H.Targets loop
+                if Hit (Target.Get, R, T_Min, Closest_So_Far, Next_Hit) then
+                    Hit_Anything   := True;
+                    Closest_So_Far := Next_Hit.T;
+                    Rec            := Next_Hit;
+                end if;
+            end loop;
+        end return;
     end Hit;
 
 end RT.Hitables;
