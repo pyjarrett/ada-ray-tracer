@@ -4,10 +4,27 @@ package body RT.Vecs is
     function "+"(A, B : Vec3) return Vec3 is (A.X + B.X, A.Y + B.Y, A.Z + B.Z);
     function "-"(A, B : Vec3) return Vec3 is (A.X - B.X, A.Y - B.Y, A.Z - B.Z);
     function "*"(A, B : Vec3) return Vec3 is (A.X * B.X, A.Y * B.Y, A.Z * B.Z);
-    function "/"(A, B : Vec3) return Vec3 is (A.X / B.X, A.Y / B.Z, A.Z / B.Z);
 
     function "*"(S : F32; A : Vec3) return Vec3 is (S * A.X, S * A.Y, S * A.Z);
     function "/"(A : Vec3; S : F32) return Vec3 is (A.X / S, A.Y / S, A.Z / S);
+
+    function Near_Zero (V : Vec3) return Boolean is
+        Epsilon : constant := 0.000_000_001;
+    begin
+        return abs V.X < Epsilon and then abs V.Y < Epsilon and then abs V.Z < Epsilon;
+    end Near_Zero;
+
+    function Near_Unit (V : Vec3) return Boolean is
+        Epsilon : constant := 1.000_000_001;
+    begin
+        return abs V.X < Epsilon and then abs V.Y < Epsilon and then abs V.Z < Epsilon;
+    end Near_Unit;
+
+    function Image (V : Vec3) return String is
+       ("(" & F32'Image (V.X) & ", " & F32'Image (V.Y) & ", " &
+        F32'Image (V.Z) & ")" & " Length: " & Length (V)'Image);
+
+    -- Vector-specifics
 
     function Dot(A, B : Vec3) return F32 is (A.X * B.X + A.Y * B.Y + A.Z * B.Z);
 
@@ -40,17 +57,5 @@ package body RT.Vecs is
     begin
         return Result;
     end Refract;
-
-    function Near_Zero (V : Vec3) return Boolean is
-        Epsilon : constant := 0.000_000_001;
-    begin
-        return abs V.X < Epsilon and then abs V.Y < Epsilon and then abs V.Z < Epsilon;
-    end Near_Zero;
-
-    function Near_Unit (V : Vec3) return Boolean is
-        Epsilon : constant := 1.000_000_001;
-    begin
-        return abs V.X < Epsilon and then abs V.Y < Epsilon and then abs V.Z < Epsilon;
-    end Near_Unit;
 
 end RT.Vecs;

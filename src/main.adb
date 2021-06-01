@@ -40,7 +40,7 @@ procedure Main is
         Ada.Text_IO.Put (Progress_Percent'Image & "%");
     end Report_Progress;
 
-    function Sky_Color (R : Ray) return Vec3 is
+    function Sky_Color (R : Ray) return Color3 is
         Unit_Direction : constant Vec3 := Unit_Vector (R.Direction);
         T              : constant F32  := 0.5 * (Unit_Direction.Y + 1.0);
     begin
@@ -48,7 +48,7 @@ procedure Main is
     end Sky_Color;
 
     function Ray_Cast
-       (R : Ray; World : Hitable'Class; Depth : Integer) return Vec3
+       (R : Ray; World : Hitable'Class; Depth : Integer) return Color3
     is
         Rec : Hit_Record;
     begin
@@ -59,7 +59,7 @@ procedure Main is
         if Hit (World, R, 0.001, F32'Last, Rec) then
             declare
                 Scattered   : Ray;
-                Attenuation : Vec3;
+                Attenuation : Color3;
             begin
                 if Scatter (Rec.Mat.all, R, Rec, Attenuation, Scattered) then
                     return
@@ -107,7 +107,7 @@ begin
             Report_Progress(Rows - Row, Rows);
             for C in 1 .. Cols loop
                 declare
-                    Result : Vec3 := (0.0, 0.0, 0.0);
+                    Result : Color3 := (0.0, 0.0, 0.0);
                 begin
                     for Sample in 1 .. Samples loop
                         declare
@@ -116,7 +116,7 @@ begin
                             V : constant F32 :=
                                (F32 (Row) + Random_F32) / F32 (Rows);
                             R     : constant Ray  := Make_Ray (Cam, U, V);
-                            Color : constant Vec3 :=
+                            Color : constant Color3 :=
                                Ray_Cast (R, World, Bounces);
                         begin
                             Result := Result + Color;

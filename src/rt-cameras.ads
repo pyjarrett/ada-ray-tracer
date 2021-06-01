@@ -12,7 +12,7 @@ is
         Lower_Left_Corner : Vec3 := (-2.0, -1.0, -1.0);
         Horizontal        : Vec3 := (4.0, 0.0, 0.0);
         Vertical          : Vec3 := (0.0, 2.0, 0.0);
-        Origin            : Vec3 := (0.0, 0.0, 0.0);
+        Origin            : Point3 := (0.0, 0.0, 0.0);
     end record;
 
     function Make_Ray (C : Camera; U, V : F32) return Ray;

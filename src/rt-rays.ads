@@ -6,10 +6,10 @@ is
     use RT.Vecs;
 
     type Ray is record
-        Origin    : Vec3;
+        Origin    : Point3;
         Direction : Vec3;
     end record;
 
-    function Point_At(R : Ray; T: F32) return Vec3;
+    function Point_At(R : Ray; T: F32) return Point3;
 
 end RT.Rays;

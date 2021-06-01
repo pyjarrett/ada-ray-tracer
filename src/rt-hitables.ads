@@ -10,7 +10,7 @@ package RT.Hitables is
 
     type Hit_Record is record
         T          : F32;
-        P          : Vec3;
+        P          : Point3;
         Normal     : Vec3;
         Front_Face : Boolean;
         Mat        : Material_Access;
@@ -36,7 +36,7 @@ package RT.Hitables is
         	(H : Hitable_List; R : Ray; T_Min : F32; T_Max : F32; Rec : in out Hit_Record) return Boolean;
 
     type Sphere is new Hitable with record
-        Center : Vec3;
+        Center : Point3;
         Radius : F32;
         Mat : Material_Access;
     end record;

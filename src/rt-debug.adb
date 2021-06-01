@@ -2,9 +2,6 @@ with Ada.Numerics;
 
 package body RT.Debug is
 
-    function Image (V : Vec3) return String is
-       ("(" & F32'Image (V.X) & ", " & F32'Image (V.Y) & ", " &
-        F32'Image (V.Z) & ")" & " Length: " & Length (V)'Image);
     function Image (R : Ray) return String is
        ("From: " & Image (R.Origin) & " To: " & Image (R.Direction) &
         " Length: " & Length (R.Direction)'Image);

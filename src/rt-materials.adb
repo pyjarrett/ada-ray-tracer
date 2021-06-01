@@ -6,7 +6,7 @@ with RT.Debug;
 package body RT.Materials is
     overriding function Scatter
        (Mat         :        Lambertian; R : Ray; Rec : RT.Hitables.Hit_Record;
-        Attenuation : in out Vec3; Scattered : in out Ray) return Boolean
+        Attenuation : in out Color3; Scattered : in out Ray) return Boolean
     is
         Scatter_Direction : Vec3 := Rec.Normal + RT.Pseudorandom.Random_Unit_Vector;
     begin
@@ -20,7 +20,7 @@ package body RT.Materials is
 
     overriding function Scatter
        (Mat         :        Metal; R : Ray; Rec : RT.Hitables.Hit_Record;
-        Attenuation : in out Vec3; Scattered : in out Ray) return Boolean
+        Attenuation : in out Color3; Scattered : in out Ray) return Boolean
     is
         Reflected : constant Vec3 :=
            Reflect (Unit_Vector (R.Direction), Rec.Normal);
@@ -33,7 +33,7 @@ package body RT.Materials is
 
     overriding function Scatter
        (Mat         :        Dielectric; R : Ray; Rec : RT.Hitables.Hit_Record;
-        Attenuation : in out Vec3; Scattered : in out Ray) return Boolean
+        Attenuation : in out Color3; Scattered : in out Ray) return Boolean
     is
         Refracted      : Vec3;
         Ni_Over_Nt     : F32;

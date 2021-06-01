@@ -9,7 +9,6 @@ package RT.Debug is
 
     Enabled : Boolean := False;
 
-    function Image (V : Vec3) return String;
     function Image (R : Ray) return String;
 
     procedure Print (Str : String) renames Ada.Text_IO.Put_Line;
