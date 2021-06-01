@@ -46,6 +46,9 @@ package RT.Hitables is
 
     procedure Clear (H : in out Hitable_List);
     procedure Add (H : in out Hitable_List; Obj : in Hitable'Class);
+    -- Ada lacks something analogous to perfect forwarding from C++, in
+    -- addition to missing arg packs and variadic arguments.  This keeps the
+    -- interface somewhat similar in intent.
 
     overriding
     function Hit
@@ -53,7 +56,7 @@ package RT.Hitables is
 
 private
 
-    type Hitable_list is new Hitable with record
+    type Hitable_List is new Hitable with record
         Targets : Hitable_Lists.Vector;
     end record;
 
