@@ -10,7 +10,7 @@ is
 
     type Camera is private;
 
-    function Make_Camera return Camera;
+    function Make_Camera (From: Point3; Look: Point3; Up : Vec3; Vertical_FOV, Aspect_Ratio : F32) return Camera;
 
     function Make_Ray (C : Camera; U, V : F32) return Ray;
 

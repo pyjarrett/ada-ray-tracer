@@ -16,11 +16,6 @@ with RT.Vecs;
 
 
 procedure Main is
-    Rows    : constant := 200;
-    Cols    : constant := 400;
-    Bounces : constant := 50;
-    Samples : constant := 30;
-
     use RT;
     use RT.Cameras;
     use RT.Hitables;
@@ -28,6 +23,12 @@ procedure Main is
     use RT.Pseudorandom;
     use RT.Rays;
     use RT.Vecs;
+
+    Rows    : constant := 200;
+    Cols    : constant := 400;
+    Bounces : constant := 50;
+    Samples : constant := 30;
+    Aspect_Ratio : constant RT.F32 := F32(Cols) / F32(Rows);
 
     Image : RT.Image_Planes.Image_Plane := RT.Image_Planes.Make_Image_Plane(Width => Cols, Height => Rows);
     Term_Info : GNATCOLL.Terminal.Terminal_Info;
@@ -78,7 +79,7 @@ begin
 
     declare
         World : Hitable_List;
-        Cam   : constant Camera := Make_Camera;
+        Cam   : constant Camera := Make_Camera ((-2.0, 2.0, 1.0), (0.0, 0.0, -1.0), (0.0, 1.0, 0.0), 20.0, Aspect_Ratio);
     begin
         World.Add(Sphere'(Center => (0.0, 0.0, -1.0), Radius => 0.5,
                           Mat    => Make_Material(Lambertian'(Albedo => (0.1, 0.2, 0.5)))));

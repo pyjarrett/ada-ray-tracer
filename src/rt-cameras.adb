@@ -1,18 +1,24 @@
+with Ada.Numerics;
+
 package body RT.Cameras is
 
-    function Make_Camera return Camera is
-        Aspect_Ratio    : constant F32 := 16.0 / 9.0;
-        Viewport_Height : constant F32 := 2.0;
+    function Degrees_To_Radians (Degrees : F32) return F32 is (Ada.Numerics.Pi / 180.0 * Degrees);
+
+    function Make_Camera (From: Point3; Look: Point3; Up : Vec3; Vertical_FOV, Aspect_Ratio : F32) return Camera is
+        Theta           : constant F32 := Degrees_To_Radians(Vertical_FOV);
+        Height          : constant F32 := RT.Elem_Funcs.Tan (Theta / 2.0);
+        Viewport_Height : constant F32 := 2.0 * Height;
         Viewport_Width  : constant F32 := Aspect_Ratio * Viewport_Height;
-        Focal_Length    : constant F32 := 1.0;
+        W               : constant Vec3 := Unit_Vector (From - Look);
+        U               : constant Vec3 := Unit_Vector (Cross (Up, W));
+        V               : constant Vec3 := Cross(W, U);
     begin
         return C : Camera do
-            C.Origin            := (0.0, 0.0, 0.0);
-            C.Horizontal        := (Viewport_Width, 0.0, 0.0);
-            C.Vertical          := (0.0, Viewport_Height, 0.0);
+            C.Origin            := From;
+            C.Horizontal        := Viewport_Width * U;
+            C.Vertical          := Viewport_Height * V;
             C.Lower_Left_Corner :=
-               C.Origin - C.Horizontal / 2.0 - C.Vertical / 2.0 -
-               Vec3'(0.0, 0.0, Focal_Length);
+               C.Origin - C.Horizontal / 2.0 - C.Vertical / 2.0 - W;
         end return;
     end Make_Camera;
 
