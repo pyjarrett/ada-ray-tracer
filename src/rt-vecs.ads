@@ -14,6 +14,7 @@ is
     function "*" (A, B : Vec3) return Vec3;
 
     function "*" (S : F32; A : Vec3) return Vec3;
+    function "*" (A : Vec3; S : F32) return Vec3;
     function "/" (A : Vec3; S : F32) return Vec3;
 
     function Near_Zero (V : Vec3) return Boolean;

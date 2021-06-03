@@ -15,7 +15,7 @@ project Ray_Tracer is
    end Builder;
 
    package Compiler is
-      for Switches ("ada") use ("-g", "-gnat12", "-gnato", "-gnata", "-gnatf", "-O2", "-gnatVa", "-gnatwa");
+      for Switches ("ada") use ("-gnat12", "-gnatf", "-gnatp", "-O3", "-gnatVa", "-gnatwa");
    end Compiler;
 
    package Linker is

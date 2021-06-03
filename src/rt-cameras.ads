@@ -2,9 +2,7 @@ with RT;
 with RT.Rays;
 with RT.Vecs;
 
-package RT.Cameras with
-    Pure
-is
+package RT.Cameras is
     use RT.Rays;
     use RT.Vecs;
 
@@ -17,7 +15,7 @@ is
         Pre => Aspect_Ratio > 0.0 and then Aperture >= 0.0
         and then Focus_Distance >= 0.0;
 
-    function Make_Ray (C : Camera; U, V : F32) return Ray;
+    function Make_Ray (C : Camera; S, T : F32) return Ray;
 
 private
 
@@ -26,6 +24,8 @@ private
         Lower_Left_Corner : Point3;
         Horizontal        : Vec3;
         Vertical          : Vec3;
+        U, V, W           : Vec3;
+        Lens_Radius       : F32;
     end record;
 
 end RT.Cameras;

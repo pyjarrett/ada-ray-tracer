@@ -23,10 +23,10 @@ procedure Main is
     use RT.Rays;
     use RT.Vecs;
 
-    Rows    : constant := 1080;
-    Cols    : constant := 1920;
-    Bounces : constant := 50;
-    Samples : constant := 500;
+    Rows    : constant := 400; --270; -- 1080;
+    Cols    : constant := 600; --480; -- 1920;
+    Bounces : constant := 3; -- 50
+    Samples : constant := 2; -- 500
     Aspect_Ratio : constant RT.F32 := F32(Cols) / F32(Rows);
 
     Image : RT.Image_Planes.Image_Plane := RT.Image_Planes.Make_Image_Plane(Width => Cols, Height => Rows);

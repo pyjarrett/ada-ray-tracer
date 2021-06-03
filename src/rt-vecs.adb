@@ -6,6 +6,7 @@ package body RT.Vecs is
     function "*"(A, B : Vec3) return Vec3 is (A.X * B.X, A.Y * B.Y, A.Z * B.Z);
 
     function "*"(S : F32; A : Vec3) return Vec3 is (S * A.X, S * A.Y, S * A.Z);
+    function "*"(A : Vec3; S : F32) return Vec3 is (S * A.X, S * A.Y, S * A.Z);
     function "/"(A : Vec3; S : F32) return Vec3 is (A.X / S, A.Y / S, A.Z / S);
 
     function Near_Zero (V : Vec3) return Boolean is
