@@ -14,7 +14,6 @@ with RT.Pseudorandom;
 with RT.Rays;
 with RT.Vecs;
 
-
 procedure Main is
     use RT;
     use RT.Cameras;
@@ -24,10 +23,10 @@ procedure Main is
     use RT.Rays;
     use RT.Vecs;
 
-    Rows    : constant := 200;
-    Cols    : constant := 400;
+    Rows    : constant := 1080;
+    Cols    : constant := 1920;
     Bounces : constant := 50;
-    Samples : constant := 30;
+    Samples : constant := 500;
     Aspect_Ratio : constant RT.F32 := F32(Cols) / F32(Rows);
 
     Image : RT.Image_Planes.Image_Plane := RT.Image_Planes.Make_Image_Plane(Width => Cols, Height => Rows);
@@ -74,24 +73,65 @@ procedure Main is
         -- Nothing was hit.
         return Sky_Color (R);
     end Ray_Cast;
+
+    function Random_Scene return Hitable_List is
+        Ground_Material : constant Material_Ptrs.Ref := Make_Material (Lambertian'(Albedo => (0.5, 0.5, 0.5)));
+    begin
+        return World : Hitable_List do
+            World.Add(Sphere'(Center => (0.0, -1000.0, 0.0), Radius => 1000.0, Mat => Ground_Material));
+
+            for A in -11 .. 10 loop
+                for B in -11 .. 10 loop
+                    declare
+                        Choose_Mat : constant F32 := Random_F32;
+                        Center     : constant Point3 := (F32(A) + 0.9 * Random_F32, 0.2, F32(B) + 0.9 * Random_F32);
+                    begin
+                        if Length(Center - (4.0, 0.2, 0.0)) > 0.9 then
+                            if Choose_Mat < 0.8 then
+                                World.Add(Sphere'(Center => Center,
+                                                  Radius => 0.2,
+                                                  Mat => Make_Material(Lambertian'(Albedo => Color3(Random_Vector * Random_Vector)))));
+                            elsif Choose_Mat < 0.95 then
+                                World.Add(Sphere'(Center => Center,
+                                                  Radius => 0.2,
+                                                  Mat => Make_Material(Metal'(Albedo => Color3(Random_Vector(0.5, 1.0)),
+                                                                             Fuzz => Random_F32(0.0, 0.5)))));
+                            else
+                                -- Glass
+                                World.Add(Sphere'(Center => Center,
+                                                  Radius => 0.2,
+                                                  Mat => Make_Material(Dielectric'(Ref_Index => 1.5))));
+                            end if;
+                        end if;
+                    end;
+                end loop;
+            end loop;
+            World.Add(Sphere'(Center => (0.0, 1.0, 0.0), Radius => 1.0,
+                              Mat    => Make_Material(Dielectric'(Ref_Index => 1.5))));
+
+            World.Add(Sphere'(Center => (-4.0, 1.0, 0.0), Radius => 1.0,
+                              Mat    => Make_Material(Lambertian'(Albedo => (0.4, 0.2, 0.1)))));
+
+            World.Add(Sphere'(Center => (4.0, 1.0, 0.0), Radius => 1.0,
+                              Mat    => Make_Material(Metal'(Albedo => (0.7, 0.6, 0.5), Fuzz => 0.0))));
+        end return;
+    end Random_Scene;
+
 begin
     GNATCOLL.Terminal.Init_For_Stdout (Term_Info);
 
     declare
-        World : Hitable_List;
-        Cam   : constant Camera := Make_Camera ((-2.0, 2.0, 1.0), (0.0, 0.0, -1.0), (0.0, 1.0, 0.0), 20.0, Aspect_Ratio);
+        World    : constant Hitable_List := Random_Scene;
+        LookFrom : constant Point3 := (13.0, 2.0, 3.0);
+        LookAt   : constant Point3 := (0.0, 0.0, 0.0);
+        Cam      : constant Camera := Make_Camera (From           => LookFrom,
+                                                   Look           => LookAt,
+                                                   Up             => (0.0, 1.0, 0.0),
+                                                   Vertical_FOV   => 20.0,
+                                                   Aspect_Ratio   => Aspect_Ratio,
+                                                   Aperture       => 0.1,
+                                                   Focus_Distance => 10.0);
     begin
-        World.Add(Sphere'(Center => (0.0, 0.0, -1.0), Radius => 0.5,
-                          Mat    => Make_Material(Lambertian'(Albedo => (0.1, 0.2, 0.5)))));
-        World.Add(Sphere'(Center => (0.0, -100.5, -1.0), Radius => 100.0,
-                          Mat    => Make_Material(Lambertian'(Albedo => (0.8, 0.8, 0.0)))));
-        World.Add(Sphere'(Center => (1.0, 0.0, -1.0), Radius => 0.5,
-                          Mat    => Make_Material(Metal'(Albedo => (0.8, 0.6, 0.2), Fuzz => 0.0))));
-        World.Add(Sphere'(Center => (-1.0, 0.0, -1.0), Radius => 0.5,
-                          Mat    => Make_Material(Dielectric'(Ref_Index => 1.5))));
-        World.Add(Sphere'(Center => (-1.0, 0.0, -1.0), Radius => -0.45,
-                          Mat => Make_Material(Dielectric'(Ref_Index => 1.5))));
-
         for Row in reverse 1 .. Rows loop
             Report_Progress(Rows - Row, Rows);
             for C in 1 .. Cols loop

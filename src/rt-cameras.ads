@@ -10,7 +10,12 @@ is
 
     type Camera is private;
 
-    function Make_Camera (From: Point3; Look: Point3; Up : Vec3; Vertical_FOV, Aspect_Ratio : F32) return Camera;
+    function Make_Camera
+       (From         : Point3; Look : Point3; Up : Vec3; Vertical_FOV : F32;
+        Aspect_Ratio : F32; Aperture : F32; Focus_Distance : F32)
+        return Camera with
+        Pre => Aspect_Ratio > 0.0 and then Aperture >= 0.0
+        and then Focus_Distance >= 0.0;
 
     function Make_Ray (C : Camera; U, V : F32) return Ray;
 
